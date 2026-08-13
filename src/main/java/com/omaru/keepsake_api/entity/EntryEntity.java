@@ -29,7 +29,9 @@ public class EntryEntity extends BaseEntity {
             ),
             @JoinColumn(
                     name = "topic_id",
-                    referencedColumnName = "id"
+                    referencedColumnName = "id",
+                    insertable = false,
+                    updatable = false
             )
     })
     private TopicEntity topic;
@@ -44,7 +46,9 @@ public class EntryEntity extends BaseEntity {
             ),
             @JoinColumn(
                     name = "member_id",
-                    referencedColumnName = "id"
+                    referencedColumnName = "id",
+                    insertable = false,
+                    updatable = false
             )
     })
     private MemberEntity member;

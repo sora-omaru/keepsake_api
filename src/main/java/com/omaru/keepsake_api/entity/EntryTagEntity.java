@@ -18,7 +18,7 @@ public class EntryTagEntity {
     @JoinColumn(name = "workspace_id", nullable = false)
     private WorkspaceEntity workspace;
 
-    @MapsId("entryId")
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(
@@ -29,12 +29,14 @@ public class EntryTagEntity {
             ),
             @JoinColumn(
                     name = "entry_id",
-                    referencedColumnName = "id"
+                    referencedColumnName = "id",
+                    insertable = false,
+                    updatable = false
             )
     })
     private EntryEntity entry;
 
-    @MapsId("tagId")
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
             @JoinColumn(
@@ -45,7 +47,9 @@ public class EntryTagEntity {
             ),
             @JoinColumn(
                     name = "tag_id",
-                    referencedColumnName = "id"
+                    referencedColumnName = "id",
+                    insertable = false,
+                    updatable = false
             )
     })
     private TagEntity tag;
