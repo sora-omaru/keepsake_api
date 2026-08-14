@@ -4,10 +4,12 @@ import com.omaru.keepsake_api.dto.request.MemberCreateRequestDto;
 import com.omaru.keepsake_api.dto.response.MemberResponseDto;
 import com.omaru.keepsake_api.entity.MemberEntity;
 import com.omaru.keepsake_api.entity.WorkspaceEntity;
+import com.omaru.keepsake_api.exception.ApiException;
 import com.omaru.keepsake_api.repository.MemberRepository;
 import com.omaru.keepsake_api.repository.WorkspaceRepository;
 import com.omaru.keepsake_api.service.MemberService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,11 +20,12 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberResponseDto createMember(MemberCreateRequestDto request, Long workspaceId) {
-        WorkspaceEntity workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new RuntimeException("Workspace Not Found"));
+        WorkspaceEntity workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "ワークスペースが見つかりません。"));
 
 
         if (memberRepository.existsByWorkspaceIdAndName(workspaceId, request.name())) {
-            throw new RuntimeException("この名前はすでに登録されています。");
+            throw new ApiException(HttpStatus.CONFLICT, "この名前はすでに登録されています。");
         }
         MemberEntity member = new MemberEntity();
         member.setWorkspace(workspace);
