@@ -27,8 +27,7 @@ public class MemberServiceImpl implements MemberService {
 
         return memberRepository.findByWorkspace_Id(workspaceId)
                 .stream()
-                .map(member ->
-                        new MemberResponseDto(member.getId(), member.getWorkspace().getId(), member.getName())).toList();
+                .map(this::toResponse).toList();
     }
 
     @Override
@@ -42,7 +41,10 @@ public class MemberServiceImpl implements MemberService {
         member.setWorkspace(workspace);
         member.setName(request.name());
 
-        MemberEntity saved = memberRepository.save(member);
-        return new MemberResponseDto(saved.getId(), saved.getWorkspace().getId(), saved.getName());
+        return toResponse(memberRepository.save(member));
+    }
+
+    private MemberResponseDto toResponse(MemberEntity member) {
+        return new MemberResponseDto(member.getId(), member.getWorkspace().getId(), member.getName());
     }
 }
