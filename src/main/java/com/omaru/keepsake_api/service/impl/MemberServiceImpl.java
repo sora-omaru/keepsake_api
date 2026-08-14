@@ -20,6 +20,10 @@ public class MemberServiceImpl implements MemberService {
     public MemberResponseDto createMember(MemberCreateRequestDto request, Long workspaceId) {
         WorkspaceEntity workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new RuntimeException("Workspace Not Found"));
 
+
+        if (memberRepository.existsByWorkspaceIdAndName(workspaceId, request.name())) {
+            throw new RuntimeException("この名前はすでに登録されています。");
+        }
         MemberEntity member = new MemberEntity();
         member.setWorkspace(workspace);
         member.setName(request.name());
