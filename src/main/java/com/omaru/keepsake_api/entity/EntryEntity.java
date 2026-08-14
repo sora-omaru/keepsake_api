@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinColumnsOrFormulas;
+import org.hibernate.annotations.JoinFormula;
 
 @Getter
 @Setter
@@ -20,35 +23,35 @@ public class EntryEntity extends BaseEntity {
     private WorkspaceEntity workspace;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(
-                    name = "workspace_id",
-                    referencedColumnName = "workspace_id",
-                    insertable = false,
-                    updatable = false
+    @JoinColumnsOrFormulas({
+            @JoinColumnOrFormula(
+                    formula = @JoinFormula(
+                            value = "workspace_id",
+                            referencedColumnName = "workspace_id"
+                    )
             ),
-            @JoinColumn(
-                    name = "topic_id",
-                    referencedColumnName = "id",
-                    insertable = false,
-                    updatable = false
+            @JoinColumnOrFormula(
+                    column = @JoinColumn(
+                            name = "topic_id",
+                            referencedColumnName = "id"
+                    )
             )
     })
     private TopicEntity topic;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(
-                    name = "workspace_id",
-                    referencedColumnName = "workspace_id",
-                    insertable = false,
-                    updatable = false
+    @JoinColumnsOrFormulas({
+            @JoinColumnOrFormula(
+                    formula = @JoinFormula(
+                            value = "workspace_id",
+                            referencedColumnName = "workspace_id"
+                    )
             ),
-            @JoinColumn(
-                    name = "member_id",
-                    referencedColumnName = "id",
-                    insertable = false,
-                    updatable = false
+            @JoinColumnOrFormula(
+                    column = @JoinColumn(
+                            name = "member_id",
+                            referencedColumnName = "id"
+                    )
             )
     })
     private MemberEntity member;
