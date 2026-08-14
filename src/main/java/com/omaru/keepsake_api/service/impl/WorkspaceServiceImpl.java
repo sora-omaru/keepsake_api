@@ -20,9 +20,10 @@ public class WorkspaceServiceImpl implements WorkspaceService {
 
         workspace.setName(request.name().trim());
 
-        WorkspaceEntity saved = workspaceRepository.save(workspace);
+        return toResponse(workspaceRepository.save((workspace)));
+    }
 
-
-        return new WorkspaceResponseDto(saved.getId(), saved.getName());
+    private WorkspaceResponseDto toResponse(WorkspaceEntity workspace) {
+        return new WorkspaceResponseDto(workspace.getId(), workspace.getName());
     }
 }
