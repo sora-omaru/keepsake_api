@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
@@ -19,10 +21,19 @@ public class MemberServiceImpl implements MemberService {
     private final WorkspaceRepository workspaceRepository;
 
     @Override
-    public MemberResponseDto createMember(MemberCreateRequestDto request, Long workspaceId) {
-        WorkspaceEntity workspace = workspaceRepository.findById(workspaceId)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "ワークスペースが見つかりません。"));
+    public List<MemberResponseDto> getMembers(Long workspaceId) {
+        WorkspaceEntity workspace = workspaceRepository.findById(workspaceId).orElseThrow(() ->
+                new ApiException(HttpStatus.NOT_FOUND, "ワークスペースが見つかりません。"));
 
+        return memberRepository.findByWorkspace_Id(workspaceId)
+                .stream()
+                .map(member ->
+                        new MemberResponseDto(member.getId(), member.getWorkspace().getId(), member.getName())).toList();
+    }
+
+    @Override
+    public MemberResponseDto createMember(MemberCreateRequestDto request, Long workspaceId) {
+        WorkspaceEntity workspace = workspaceRepository.findById(workspaceId).orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "ワークスペースが見つかりません。"));
 
         if (memberRepository.existsByWorkspaceIdAndName(workspaceId, request.name())) {
             throw new ApiException(HttpStatus.CONFLICT, "この名前はすでに登録されています。");
