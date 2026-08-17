@@ -4,7 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record TopicCreateRequestDto(
-        @NotBlank @Size(max = 100) String name,
+        @NotBlank(message = "タイトルを決めてください")
+        @Size(max = 100)
+        String name,
         String description
 ) {
 }
