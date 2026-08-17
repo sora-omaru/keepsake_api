@@ -8,5 +8,5 @@ import java.util.List;
 public interface MemberService {
     List<MemberResponseDto> getMembers(Long workspaceId);
 
-    MemberResponseDto createMember(MemberCreateRequestDto requestDto, Long workspaceId);
+    public MemberResponseDto createMember(MemberCreateRequestDto requestDto, Long workspaceId);
 }
