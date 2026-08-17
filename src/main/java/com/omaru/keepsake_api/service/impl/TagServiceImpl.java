@@ -12,12 +12,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
 
     private final WorkspaceRepository workspaceRepository;
     private final TagRepository tagRepository;
+
+    @Override
+    public List<TagResponseDto> getTags(Long workspaceId) {
+        getWorkspace(workspaceId);
+
+        return tagRepository.findByWorkspace_Id(workspaceId).stream().map(this::toResponse).toList();
+    }
 
     @Override
     public TagResponseDto createTag(TagCreateRequestDto request, Long workspaceId) {
