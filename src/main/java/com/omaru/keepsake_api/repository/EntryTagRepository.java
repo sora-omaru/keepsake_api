@@ -5,4 +5,8 @@ import com.omaru.keepsake_api.entity.EntryTagId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EntryTagRepository extends JpaRepository<EntryTagEntity, EntryTagId> {
+    boolean existsByEntry_IdAndTag_Id(
+            Long entryId,
+            Long tagId
+    );
 }
