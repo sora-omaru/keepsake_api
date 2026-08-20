@@ -9,4 +9,6 @@ public interface EntryTagRepository extends JpaRepository<EntryTagEntity, EntryT
             Long entryId,
             Long tagId
     );
+
+    void deleteByEntry_IdAndTag_Id(Long entryId, Long tagId);
 }

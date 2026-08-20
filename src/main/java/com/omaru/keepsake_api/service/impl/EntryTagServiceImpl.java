@@ -8,7 +8,6 @@ import com.omaru.keepsake_api.exception.ApiException;
 import com.omaru.keepsake_api.repository.EntryRepository;
 import com.omaru.keepsake_api.repository.EntryTagRepository;
 import com.omaru.keepsake_api.repository.TagRepository;
-import com.omaru.keepsake_api.repository.WorkspaceRepository;
 import com.omaru.keepsake_api.service.EntryTagService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +21,7 @@ public class EntryTagServiceImpl implements EntryTagService {
     private final EntryRepository entryRepository;
     private final EntryTagRepository entryTagRepository;
 
-
+    //TagとEntryを紐づける
     @Override
     @Transactional
     public void addTag(Long workspaceId, Long topicId, Long entryId, Long tagId) {
@@ -39,20 +38,44 @@ public class EntryTagServiceImpl implements EntryTagService {
                         HttpStatus.NOT_FOUND,
                         "Tagが見つかりません"
                 ));
-       //すでに紐づいているのであればreturn
+        //すでに紐づいているのであればreturn
         if (entryTagRepository.existsByEntry_IdAndTag_Id(entryId, tagId)) {
             return;
         }
 
 
         EntryTagEntity entryTag = new EntryTagEntity();
-        entryTag.setId(new EntryTagId(entryId,tagId));
+        entryTag.setId(new EntryTagId(entryId, tagId));
         entryTag.setWorkspace(entry.getWorkspace());
         entryTag.setEntry(entry);
         entryTag.setTag(tag);
 
         entryTagRepository.save(entryTag);
 
+    }
+    //TagとEntryの紐づけ解除
+    @Override
+    @Transactional
+    public void removeTag(
+            Long workspaceId,
+            Long topicId,
+            Long entryId,
+            Long tagId
+    ) {
+        entryRepository.findByIdAndWorkspace_IdAndTopic_Id(
+                        entryId, workspaceId, topicId)
+                .orElseThrow(() -> new ApiException(
+                        HttpStatus.NOT_FOUND,
+                        "Entryが見つかりません"
+                ));
+        //Tagがworkspaceに紐づいているかを確認
+        tagRepository.findByIdAndWorkspace_Id(tagId, workspaceId)
+                .orElseThrow(() -> new ApiException(
+                        HttpStatus.NOT_FOUND,
+                        "Tagが見つかりません"
+                ));
+
+        entryTagRepository.deleteByEntry_IdAndTag_Id(entryId, tagId);
     }
 
 }
