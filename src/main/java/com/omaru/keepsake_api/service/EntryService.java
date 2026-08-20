@@ -9,4 +9,6 @@ public interface EntryService {
     List<EntryResponseDto> getEntries(Long workspaceId, Long topicId);
 
     EntryResponseDto createEntry(Long workspaceId, Long topicId, EntryCreateRequestDto request);
+
+
 }
