@@ -2,6 +2,7 @@ package com.omaru.keepsake_api.controller;
 
 import com.omaru.keepsake_api.dto.request.EntryCreateRequestDto;
 import com.omaru.keepsake_api.dto.response.EntryResponseDto;
+import com.omaru.keepsake_api.dto.response.TagResponseDto;
 import com.omaru.keepsake_api.service.EntryService;
 import com.omaru.keepsake_api.service.EntryTagService;
 import jakarta.validation.Valid;
@@ -34,6 +35,15 @@ public class EntryController {
             @Valid @RequestBody EntryCreateRequestDto request
     ) {
         return entryService.createEntry(workspaceId, topicId, request);
+    }
+
+    @GetMapping("/{entryId}/tags")
+    public List<TagResponseDto> getTags(
+            @PathVariable Long workspaceId,
+            @PathVariable Long topicId,
+            @PathVariable Long entryId
+    ) {
+        return entryTagService.getTags(workspaceId, topicId, entryId);
     }
 
     @PutMapping("/{entryId}/tags/{tagId}")
