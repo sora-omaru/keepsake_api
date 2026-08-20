@@ -21,5 +21,5 @@ public interface EntryTagRepository extends JpaRepository<EntryTagEntity, EntryT
                 FROM EntryTagEntity et
                 WHERE et.entry.id = :entryId
             """)
-    List<TagEntity> findTagsByEntryUd(Long entryId);
+    List<TagEntity> findTagsByEntryId(Long entryId);
 }
