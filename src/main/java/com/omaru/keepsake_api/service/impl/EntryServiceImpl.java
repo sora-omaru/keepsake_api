@@ -17,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class EntryServiceImpl implements EntryService {
@@ -27,9 +29,20 @@ public class EntryServiceImpl implements EntryService {
 
     @Override
     @Transactional
-    public EntryResponseDto createEntry(Long workspaceId, EntryCreateRequestDto request) {
+    public List<EntryResponseDto> getEntries(Long workspaceId, Long topicId) {
+        getTopic(workspaceId, topicId);
+
+        return entryRepository.findByWorkspace_IdAndTopic_Id(workspaceId, topicId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public EntryResponseDto createEntry(Long workspaceId, Long topicId, EntryCreateRequestDto request) {
         WorkspaceEntity workspace = getWorkspace(workspaceId);
-        TopicEntity topic = getTopic(workspaceId, request.topicId());
+        TopicEntity topic = getTopic(workspaceId, topicId);
         MemberEntity member = getMember(workspaceId, request.memberId());
 
         EntryEntity entry = new EntryEntity();

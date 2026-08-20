@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public record EntryCreateRequestDto(
-        @NotNull(message = "トピックを指定してください")
-        Long topicId,
         @NotNull(message = "メンバーを指定してください")
         Long memberId,
         @NotBlank(message = "タイトルを入力してください")
