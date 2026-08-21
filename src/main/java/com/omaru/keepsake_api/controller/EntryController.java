@@ -1,6 +1,7 @@
 package com.omaru.keepsake_api.controller;
 
 import com.omaru.keepsake_api.dto.request.EntryCreateRequestDto;
+import com.omaru.keepsake_api.dto.request.EntryUpdateRequestDto;
 import com.omaru.keepsake_api.dto.response.EntryResponseDto;
 import com.omaru.keepsake_api.dto.response.TagResponseDto;
 import com.omaru.keepsake_api.service.EntryService;
@@ -66,5 +67,15 @@ public class EntryController {
             @PathVariable Long tagId
     ) {
         entryTagService.removeTag(workspaceId, topicId, entryId, tagId);
+    }
+
+    @PutMapping("/{entryId}")
+    public EntryResponseDto updateEntry(
+            @PathVariable Long workspaceId,
+            @PathVariable Long topicId,
+            @PathVariable Long entryId,
+            @Valid @RequestBody EntryUpdateRequestDto request
+    ){
+        return entryService.updateEntry(workspaceId,topicId,entryId, request);
     }
 }
