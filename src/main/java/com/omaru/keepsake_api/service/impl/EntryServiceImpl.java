@@ -1,6 +1,7 @@
 package com.omaru.keepsake_api.service.impl;
 
 import com.omaru.keepsake_api.dto.request.EntryCreateRequestDto;
+import com.omaru.keepsake_api.dto.request.EntryUpdateRequestDto;
 import com.omaru.keepsake_api.dto.response.EntryResponseDto;
 import com.omaru.keepsake_api.entity.EntryEntity;
 import com.omaru.keepsake_api.entity.MemberEntity;
@@ -55,6 +56,19 @@ public class EntryServiceImpl implements EntryService {
         return toResponse(entryRepository.save(entry));
     }
 
+    @Override
+    @Transactional
+    public EntryResponseDto updateEntry(Long workspaceId, Long topicId, Long entryId, EntryUpdateRequestDto request) {
+
+        EntryEntity entry = getEntry(workspaceId, topicId, entryId);
+
+        entry.setTitle(request.title().trim());
+        entry.setContent(request.content());
+
+        return toResponse(entryRepository.save(entry));
+
+    }
+
     //Workspace検索用
     private WorkspaceEntity getWorkspace(Long workspaceId) {
         return workspaceRepository.findById(workspaceId)
@@ -82,6 +96,12 @@ public class EntryServiceImpl implements EntryService {
                         HttpStatus.NOT_FOUND,
                         "メンバーが見つかりません"
                 ));
+    }
+
+    //Entry検索用メソッド
+    private EntryEntity getEntry(Long workspaceId, Long topicId, Long entryId) {
+        return entryRepository.findByIdAndWorkspace_IdAndTopic_Id(entryId, workspaceId, topicId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Entryが見つかりません"));
     }
 
     //変換用メソッド
