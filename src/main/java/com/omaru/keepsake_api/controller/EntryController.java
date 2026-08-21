@@ -38,6 +38,16 @@ public class EntryController {
         return entryService.createEntry(workspaceId, topicId, request);
     }
 
+    @DeleteMapping("/{entryId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteEntry(
+            @PathVariable Long workspaceId,
+            @PathVariable Long topicId,
+            @PathVariable Long entryId
+    ) {
+        entryService.deleteEntry(workspaceId, topicId, entryId);
+    }
+
     @GetMapping("/{entryId}/tags")
     public List<TagResponseDto> getTags(
             @PathVariable Long workspaceId,

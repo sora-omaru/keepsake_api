@@ -13,4 +13,6 @@ public interface EntryService {
     EntryResponseDto createEntry(Long workspaceId, Long topicId, EntryCreateRequestDto request);
 
     EntryResponseDto updateEntry(Long workspaceId, Long topicId, Long entryId, EntryUpdateRequestDto request);
+
+    void deleteEntry(Long workspaceId, Long topicId, Long entryId);
 }

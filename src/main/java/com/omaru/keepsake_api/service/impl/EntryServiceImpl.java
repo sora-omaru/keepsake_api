@@ -69,6 +69,13 @@ public class EntryServiceImpl implements EntryService {
 
     }
 
+    @Override
+    @Transactional
+    public void deleteEntry(Long workspaceId, Long topicId, Long entryId) {
+        EntryEntity entry = getEntry(workspaceId, topicId, entryId);
+        entryRepository.delete(entry);
+    }
+
     //Workspace検索用
     private WorkspaceEntity getWorkspace(Long workspaceId) {
         return workspaceRepository.findById(workspaceId)
