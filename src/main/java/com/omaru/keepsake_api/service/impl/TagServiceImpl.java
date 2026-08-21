@@ -8,6 +8,7 @@ import com.omaru.keepsake_api.exception.ApiException;
 import com.omaru.keepsake_api.repository.TagRepository;
 import com.omaru.keepsake_api.repository.WorkspaceRepository;
 import com.omaru.keepsake_api.service.TagService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -40,10 +41,24 @@ public class TagServiceImpl implements TagService {
         return toResponse(tagRepository.save(tag));
     }
 
+    @Override
+    @Transactional
+    public void deleteTag(Long workspaceId, Long tagId) {
+        TagEntity tag = getTag(workspaceId, tagId);
+        tagRepository.delete(tag);
+    }
+
     private WorkspaceEntity getWorkspace(Long workspaceId) {
         return workspaceRepository.findById(workspaceId)
                 .orElseThrow(() -> new ApiException(
                         HttpStatus.NOT_FOUND, "ワークスペースが見つかりません"
+                ));
+    }
+
+    private TagEntity getTag(Long workspaceId, Long tagId) {
+        return tagRepository.findByIdAndWorkspace_Id(tagId, workspaceId)
+                .orElseThrow(() -> new ApiException(
+                        HttpStatus.NOT_FOUND, "タグが見つかりません"
                 ));
     }
 

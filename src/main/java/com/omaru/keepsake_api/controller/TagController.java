@@ -29,4 +29,13 @@ public class TagController {
     ) {
         return tagService.createTag(request, workspaceId);
     }
+
+    @DeleteMapping("/{tagId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTag(
+            @PathVariable Long workspaceId,
+            @PathVariable Long tagId
+    ) {
+        tagService.deleteTag(workspaceId, tagId);
+    }
 }

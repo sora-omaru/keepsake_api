@@ -9,4 +9,6 @@ public interface TagService {
     List<TagResponseDto>getTags(Long workspaceId);
 
     TagResponseDto createTag(TagCreateRequestDto request,Long workspaceId);
+
+    void deleteTag(Long workspaceId, Long tagId);
 }
