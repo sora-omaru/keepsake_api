@@ -1,17 +1,16 @@
 package com.omaru.keepsake_api.service.impl;
 
+// import com.omaru.keepsake_api.dto.EntryTagProjection;
 import com.omaru.keepsake_api.dto.request.EntryCreateRequestDto;
 import com.omaru.keepsake_api.dto.request.EntryUpdateRequestDto;
 import com.omaru.keepsake_api.dto.response.EntryResponseDto;
+// import com.omaru.keepsake_api.dto.response.TagResponseDto;
 import com.omaru.keepsake_api.entity.EntryEntity;
 import com.omaru.keepsake_api.entity.MemberEntity;
 import com.omaru.keepsake_api.entity.TopicEntity;
 import com.omaru.keepsake_api.entity.WorkspaceEntity;
 import com.omaru.keepsake_api.exception.ApiException;
-import com.omaru.keepsake_api.repository.EntryRepository;
-import com.omaru.keepsake_api.repository.MemberRepository;
-import com.omaru.keepsake_api.repository.TopicRepository;
-import com.omaru.keepsake_api.repository.WorkspaceRepository;
+import com.omaru.keepsake_api.repository.*;
 import com.omaru.keepsake_api.service.EntryService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+// import java.util.Map;
+// import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,16 +28,46 @@ public class EntryServiceImpl implements EntryService {
     private final TopicRepository topicRepository;
     private final MemberRepository memberRepository;
     private final EntryRepository entryRepository;
+    // Entry一覧へTagを含める場合に使用する。
+    // private final EntryTagRepository entryTagRepository;
 
     @Override
     @Transactional
     public List<EntryResponseDto> getEntries(Long workspaceId, Long topicId) {
         getTopic(workspaceId, topicId);
 
+        // 現在はEntryだけを取得し、Tag取得クエリは実行しない。
         return entryRepository.findByWorkspace_IdAndTopic_Id(workspaceId, topicId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
+
+        // Entry一覧へTagを含める場合は、以下のように一括取得してEntry IDごとにまとめる。
+        // List<EntryEntity> entries = entryRepository.findByWorkspace_IdAndTopic_Id(workspaceId, topicId);
+        // if (entries.isEmpty()) {
+        //     return List.of();
+        // }
+        // List<Long> entryIds = entries.stream().map(EntryEntity::getId).toList();
+        // Map<Long, List<TagResponseDto>> tagsByEntryId =
+        //         entryTagRepository.findTagsByEntryIds(workspaceId, entryIds)
+        //                 .stream()
+        //                 .collect(Collectors.groupingBy(
+        //                         EntryTagProjection::getEntryId,
+        //                         Collectors.mapping(
+        //                                 tag -> new TagResponseDto(
+        //                                         tag.getTagId(),
+        //                                         tag.getTagName(),
+        //                                         tag.getWorkspaceId()
+        //                                 ),
+        //                                 Collectors.toList()
+        //                         )
+        //                 ));
+        // return entries.stream()
+        //         .map(entry -> toResponse(
+        //                 entry,
+        //                 tagsByEntryId.getOrDefault(entry.getId(), List.of())
+        //         ))
+        //         .toList();
     }
 
     @Override
@@ -66,6 +97,14 @@ public class EntryServiceImpl implements EntryService {
         entry.setContent(request.content());
 
         return toResponse(entryRepository.save(entry));
+
+        // Entry更新レスポンスにTagを含める場合に使用する。
+        // EntryEntity savedEntry = entryRepository.save(entry);
+        // List<TagResponseDto> tags = entryTagRepository.findTagsByEntryId(entryId)
+        //         .stream()
+        //         .map(this::toTagResponse)
+        //         .toList();
+        // return toResponse(savedEntry, tags);
 
     }
 
@@ -122,4 +161,13 @@ public class EntryServiceImpl implements EntryService {
                 entry.getContent()
         );
     }
+
+    // Entry更新レスポンスにTagを含める場合の変換処理。
+    // private TagResponseDto toTagResponse(TagEntity tag) {
+    //     return new TagResponseDto(
+    //             tag.getId(),
+    //             tag.getName(),
+    //             tag.getWorkspace().getId()
+    //     );
+    // }
 }
