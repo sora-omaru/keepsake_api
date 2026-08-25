@@ -27,10 +27,10 @@ public class AccountServiceImpl implements AccountService {
                         })
                 .orElseGet(() -> {
                     AccountEntity account = new AccountEntity();
-                    account.setGoogleSub(account.getGoogleSub());
-                    account.setEmail(account.getEmail());
-                    account.setDisplayName(account.getDisplayName());
-                    account.setPictureUrl(account.getPictureUrl());
+                    account.setGoogleSub(googleAccount.googleSub());
+                    account.setEmail(googleAccount.email());
+                    account.setDisplayName(googleAccount.displayName());
+                    account.setPictureUrl(googleAccount.pictureUrl());
 
                     return accountRepository.save(account);
                 });
