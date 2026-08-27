@@ -1,4 +1,7 @@
 package com.omaru.keepsake_api.service;
 
-public class JwtService {
+import com.omaru.keepsake_api.entity.AccountEntity;
+
+public interface JwtService {
+    String generateAccessToken(AccountEntity account);
 }
