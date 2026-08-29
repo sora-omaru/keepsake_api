@@ -4,6 +4,7 @@ import com.omaru.keepsake_api.dto.account.GoogleAccountDto;
 import com.omaru.keepsake_api.entity.AccountEntity;
 import com.omaru.keepsake_api.service.AccountService;
 import com.omaru.keepsake_api.service.JwtService;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -40,9 +41,15 @@ public class SuccessHandler implements AuthenticationSuccessHandler {
         AccountEntity account = accountService.findOrCreateByGoogle(googleAccount);
 
         String accessToken = jwtService.generateAccessToken(account);
-//        JWTの発行自体は可能な状態になりました。次は、生成したアクセス
-//                トークンをレスポンスまたはCookieでフロントへ渡す処理が必要で
-//        す。
+
+        Cookie cookie = new Cookie("access_token", accessToken);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60);//1時間
+
+        response.addCookie(cookie);
+
     }
 
 }
