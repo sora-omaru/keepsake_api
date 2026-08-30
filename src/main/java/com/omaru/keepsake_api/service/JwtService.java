@@ -4,4 +4,6 @@ import com.omaru.keepsake_api.entity.AccountEntity;
 
 public interface JwtService {
     String generateAccessToken(AccountEntity account);
+
+  Long verifyAndGetAccountId(String token);
 }

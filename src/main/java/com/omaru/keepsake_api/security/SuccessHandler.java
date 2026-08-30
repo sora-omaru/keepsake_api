@@ -44,7 +44,7 @@ public class SuccessHandler implements AuthenticationSuccessHandler {
 
         Cookie cookie = new Cookie("access_token", accessToken);
         cookie.setHttpOnly(true);
-        cookie.setSecure(true);
+        cookie.setSecure(false);
         cookie.setPath("/");
         cookie.setMaxAge(60 * 60);//1時間
 
