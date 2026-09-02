@@ -1,5 +1,6 @@
 package com.omaru.keepsake_api.security;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.omaru.keepsake_api.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -28,20 +29,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = getAccessToken(request);
 
 
-        if (token != null) {
-            Long accountId = jwtService.verifyAndGetAccountId(token);
-//認証情報をSpringSecurityで作成
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            accountId,
-                            null,
-                            Collections.emptyList()
-                    );
-//         認証済みであると伝える
-            SecurityContextHolder.getContext()
-                    .setAuthentication(authentication);
-        }
+        if (token != null
+                &&
+                SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                Long accountId = jwtService.verifyAndGetAccountId(token);
 
+                var authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                accountId,
+                                null,
+                                Collections.emptyList()
+                        );
+//         認証済みであると伝える
+                SecurityContextHolder.getContext()
+                        .setAuthentication(authentication);
+            } catch (JWTVerificationException | NumberFormatException exception) {
+                //不正・期限切れJWTは未認証として扱う
+                SecurityContextHolder.clearContext();
+            }
+        }
         filterChain.doFilter(request, response);
     }
 
