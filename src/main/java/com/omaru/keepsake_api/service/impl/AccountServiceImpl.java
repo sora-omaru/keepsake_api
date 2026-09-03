@@ -1,11 +1,14 @@
 package com.omaru.keepsake_api.service.impl;
 
 import com.omaru.keepsake_api.dto.account.GoogleAccountDto;
+import com.omaru.keepsake_api.dto.response.AccountResponseDto;
 import com.omaru.keepsake_api.entity.AccountEntity;
+import com.omaru.keepsake_api.exception.ApiException;
 import com.omaru.keepsake_api.repository.AccountRepository;
 import com.omaru.keepsake_api.service.AccountService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -36,4 +39,20 @@ public class AccountServiceImpl implements AccountService {
                 });
 
     }
+
+    @Override
+    @Transactional(Transactional.TxType.SUPPORTS)
+    public AccountResponseDto getMe(Long accountId) {
+        AccountEntity account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "アカウントが見つかりません"));
+
+        return new AccountResponseDto(
+                account.getId(),
+                account.getEmail(),
+                account.getDisplayName(),
+                account.getPictureUrl()
+        );
+    }
+//    次はログイン成功後のフロントへのリダイレクトと、Cookieを使った
+//    CORS設定を整えるのが自然です。
 }
