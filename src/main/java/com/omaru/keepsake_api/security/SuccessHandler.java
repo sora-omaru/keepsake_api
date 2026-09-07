@@ -49,6 +49,8 @@ public class SuccessHandler implements AuthenticationSuccessHandler {
         cookie.setMaxAge(60 * 60);//1時間
 
         response.addCookie(cookie);
+        //フロントができまでは、ログイン中のユーザー情報を表示する。
+        response.sendRedirect("/api/v1/me");
 
     }
 
