@@ -43,6 +43,12 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional(Transactional.TxType.SUPPORTS)
     public AccountResponseDto getMe(Long accountId) {
+
+        //accountIdがnullの場合の例外
+        if (accountId == null) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "認証が必要です");
+        }
+
         AccountEntity account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "アカウントが見つかりません"));
 
