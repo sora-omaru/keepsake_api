@@ -53,6 +53,5 @@ public class AccountServiceImpl implements AccountService {
                 account.getPictureUrl()
         );
     }
-//    次はログイン成功後のフロントへのリダイレクトと、Cookieを使った
-//    CORS設定を整えるのが自然です。
+
 }
