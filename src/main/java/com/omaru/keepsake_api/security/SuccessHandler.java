@@ -50,8 +50,7 @@ public class SuccessHandler implements AuthenticationSuccessHandler {
 
         response.addCookie(cookie);
         //フロントができまでは、ログイン中のユーザー情報を表示する。
-        response.sendRedirect("/api/v1/me");
-
+        response.sendRedirect("http://localhost:3000/");
     }
 
 }

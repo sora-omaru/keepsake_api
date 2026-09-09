@@ -28,13 +28,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = getAccessToken(request);
 
-
-        if (token != null
-                &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
+        // ① Cookieからtokenを取得できているか確認
+        System.out.println("① token exists = " + (token != null));
+        System.out.println(
+                "authentication = "
+                        + SecurityContextHolder.getContext().getAuthentication()
+        );
+        // Cookie JWT takes precedence over authentication restored from the OAuth2 session.
+        if (token != null) {
             try {
+
+                // ② JWT検証処理に入ったか
+                System.out.println("② JWT検証開始");
+
                 Long accountId = jwtService.verifyAndGetAccountId(token);
 
+                System.out.println("③ accountId = " + accountId);
                 var authentication =
                         new UsernamePasswordAuthenticationToken(
                                 accountId,
@@ -46,6 +55,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .setAuthentication(authentication);
             } catch (JWTVerificationException | NumberFormatException exception) {
                 //不正・期限切れJWTは未認証として扱う
+                // ④ JWT検証で失敗した場合
+                System.out.println("④ JWT検証失敗");
+                exception.printStackTrace();
                 SecurityContextHolder.clearContext();
             }
         }

@@ -54,6 +54,8 @@ public class JwtServiceImpl implements JwtService {
         // 署名・issuer・有効期限を検証し、正常な場合のみJWTの内容を取得
         DecodedJWT decodedJWT = verifier.verify(token);
 
+        System.out.println("subject = " + decodedJWT.getSubject());
+
         Long accountId = Long.valueOf(decodedJWT.getSubject());
 
         return accountId;
