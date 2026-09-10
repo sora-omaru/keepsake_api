@@ -6,7 +6,7 @@ import com.omaru.keepsake_api.dto.request.EntryUpdateRequestDto;
 import com.omaru.keepsake_api.dto.response.EntryResponseDto;
 // import com.omaru.keepsake_api.dto.response.TagResponseDto;
 import com.omaru.keepsake_api.entity.EntryEntity;
-import com.omaru.keepsake_api.entity.MemberEntity;
+import com.omaru.keepsake_api.entity.AccountEntity;
 import com.omaru.keepsake_api.entity.TopicEntity;
 import com.omaru.keepsake_api.entity.WorkspaceEntity;
 import com.omaru.keepsake_api.exception.ApiException;
@@ -26,7 +26,7 @@ import java.util.List;
 public class EntryServiceImpl implements EntryService {
     private final WorkspaceRepository workspaceRepository;
     private final TopicRepository topicRepository;
-    private final MemberRepository memberRepository;
+    private final AccountRepository accountRepository;
     private final EntryRepository entryRepository;
     // Entry一覧へTagを含める場合に使用する。
     // private final EntryTagRepository entryTagRepository;
@@ -72,15 +72,16 @@ public class EntryServiceImpl implements EntryService {
 
     @Override
     @Transactional
-    public EntryResponseDto createEntry(Long workspaceId, Long topicId, EntryCreateRequestDto request) {
+    public EntryResponseDto createEntry(Long workspaceId, Long topicId, Long accountId, EntryCreateRequestDto request) {
         WorkspaceEntity workspace = getWorkspace(workspaceId);
         TopicEntity topic = getTopic(workspaceId, topicId);
-        MemberEntity member = getMember(workspaceId, request.memberId());
+        AccountEntity creator = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "ログインし直してください"));
 
         EntryEntity entry = new EntryEntity();
         entry.setWorkspace(workspace);
         entry.setTopic(topic);
-        entry.setMember(member);
+        entry.setCreator(creator);
         entry.setTitle(request.title().trim());
         entry.setContent(request.content());
 
@@ -115,6 +116,14 @@ public class EntryServiceImpl implements EntryService {
         entryRepository.delete(entry);
     }
 
+    @Override
+    @Transactional
+    public void updateCompletion(Long workspaceId, Long topicId, Long entryId, boolean completed) {
+        EntryEntity entry = getEntry(workspaceId, topicId, entryId);
+        entry.setCompleted(completed);
+        entryRepository.save(entry);
+    }
+
     //Workspace検索用
     private WorkspaceEntity getWorkspace(Long workspaceId) {
         return workspaceRepository.findById(workspaceId)
@@ -135,19 +144,18 @@ public class EntryServiceImpl implements EntryService {
                 );
     }
 
-    //Member検索用
-    private MemberEntity getMember(Long workspaceId, Long memberId) {
-        return memberRepository.findByIdAndWorkspace_Id(memberId, workspaceId).orElseThrow(() ->
-                new ApiException(
-                        HttpStatus.NOT_FOUND,
-                        "メンバーが見つかりません"
-                ));
-    }
-
     //Entry検索用メソッド
     private EntryEntity getEntry(Long workspaceId, Long topicId, Long entryId) {
         return entryRepository.findByIdAndWorkspace_IdAndTopic_Id(entryId, workspaceId, topicId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Entryが見つかりません"));
+    }
+
+    private String creatorName(EntryEntity entry) {
+        if (entry.getCreator() != null) {
+            String name = entry.getCreator().getDisplayName();
+            return name == null || name.isBlank() ? "ユーザー" : name;
+        }
+        return entry.getMember() == null ? "不明" : entry.getMember().getName();
     }
 
     //変換用メソッド
@@ -156,9 +164,12 @@ public class EntryServiceImpl implements EntryService {
                 entry.getId(),
                 entry.getWorkspace().getId(),
                 entry.getTopic().getId(),
-                entry.getMember().getId(),
+                entry.getMember() == null ? null : entry.getMember().getId(),
+                entry.getCreator() == null ? null : entry.getCreator().getId(),
+                creatorName(entry),
                 entry.getTitle(),
-                entry.getContent()
+                entry.getContent(),
+                entry.isCompleted()
         );
     }
 

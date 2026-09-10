@@ -1,8 +1,10 @@
 package com.omaru.keepsake_api.controller;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import com.omaru.keepsake_api.dto.request.EntryCreateRequestDto;
+import com.omaru.keepsake_api.dto.request.EntryCompletionRequestDto;
 import com.omaru.keepsake_api.dto.request.EntryUpdateRequestDto;
 import com.omaru.keepsake_api.dto.response.EntryResponseDto;
 import com.omaru.keepsake_api.dto.response.TagResponseDto;
@@ -34,11 +36,12 @@ public class EntryController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EntryResponseDto createEntry(
+            @AuthenticationPrincipal Long accountId,
             @PathVariable Long workspaceId,
             @PathVariable Long topicId,
             @Valid @RequestBody EntryCreateRequestDto request
     ) {
-        return entryService.createEntry(workspaceId, topicId, request);
+        return entryService.createEntry(workspaceId, topicId, accountId, request);
     }
 
     @DeleteMapping("/{entryId}")
@@ -80,6 +83,17 @@ public class EntryController {
             @PathVariable Long tagId
     ) {
         entryTagService.removeTag(workspaceId, topicId, entryId, tagId);
+    }
+
+    @PatchMapping("/{entryId}/completion")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updateCompletion(
+            @PathVariable Long workspaceId,
+            @PathVariable Long topicId,
+            @PathVariable Long entryId,
+            @Valid @RequestBody EntryCompletionRequestDto request
+    ) {
+        entryService.updateCompletion(workspaceId, topicId, entryId, request.completed());
     }
 
     @PutMapping("/{entryId}")

@@ -24,7 +24,7 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.findByGoogleSub(googleAccount.googleSub()).map(
                         account -> {
                             account.setEmail(googleAccount.email());
-                            account.setDisplayName(googleAccount.displayName());
+                            // Preserve the name chosen by the user across logins.
                             account.setPictureUrl(googleAccount.pictureUrl());
                             return account;
                         })
@@ -58,6 +58,22 @@ public class AccountServiceImpl implements AccountService {
                 account.getDisplayName(),
                 account.getPictureUrl()
         );
+    }
+
+    @Override
+    @Transactional
+    public AccountResponseDto updateDisplayName(Long accountId, String displayName) {
+        if (accountId == null) {
+            throw new ApiException(HttpStatus.UNAUTHORIZED, "認証が必要です");
+        }
+        if (displayName == null || displayName.isBlank() || displayName.length() > 100) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "作成者名を1〜100文字で入力してください");
+        }
+        AccountEntity account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "アカウントが見つかりません"));
+        account.setDisplayName(displayName.strip());
+        accountRepository.save(account);
+        return new AccountResponseDto(account.getId(), account.getEmail(), account.getDisplayName(), account.getPictureUrl());
     }
 
 }

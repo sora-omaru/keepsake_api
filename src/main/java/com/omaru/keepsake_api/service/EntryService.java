@@ -10,9 +10,11 @@ import java.util.List;
 public interface EntryService {
     List<EntryResponseDto> getEntries(Long workspaceId, Long topicId);
 
-    EntryResponseDto createEntry(Long workspaceId, Long topicId, EntryCreateRequestDto request);
+    EntryResponseDto createEntry(Long workspaceId, Long topicId, Long accountId, EntryCreateRequestDto request);
 
     EntryResponseDto updateEntry(Long workspaceId, Long topicId, Long entryId, EntryUpdateRequestDto request);
+
+    void updateCompletion(Long workspaceId, Long topicId, Long entryId, boolean completed);
 
     void deleteEntry(Long workspaceId, Long topicId, Long entryId);
 }

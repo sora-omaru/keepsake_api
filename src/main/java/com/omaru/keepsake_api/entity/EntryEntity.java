@@ -13,6 +13,7 @@ import org.hibernate.annotations.JoinFormula;
 @NoArgsConstructor
 @Entity
 @Table(name = "entry")
+@org.hibernate.annotations.DynamicUpdate
 public class EntryEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,11 +57,18 @@ public class EntryEntity extends BaseEntity {
     })
     private MemberEntity member;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_account_id")
+    private AccountEntity creator;
+
     @Column(nullable = false, length = 100)
     private String title;
 
     @Column
     private String content;
+
+    @Column(nullable = false)
+    private boolean completed = false;
 
 
 }

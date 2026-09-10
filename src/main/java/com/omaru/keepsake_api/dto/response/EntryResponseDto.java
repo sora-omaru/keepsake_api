@@ -8,9 +8,12 @@ public record EntryResponseDto(
         Long workspaceId,
         Long topicId,
         Long memberId,
+        Long creatorId,
+        String creatorName,
         // Entry一覧ではTagが不要になったため、レスポンス項目から除外している。
         // List<TagResponseDto> tags,
         String title,
-        String content
+        String content,
+        boolean completed
 ) {
 }

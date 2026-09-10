@@ -8,4 +8,6 @@ public interface AccountService {
     AccountEntity findOrCreateByGoogle(GoogleAccountDto googleAccount);
 
     AccountResponseDto getMe(Long accountId);
+
+    AccountResponseDto updateDisplayName(Long accountId, String displayName);
 }
