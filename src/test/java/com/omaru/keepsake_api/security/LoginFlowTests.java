@@ -43,8 +43,11 @@ class LoginFlowTests {
     @Configuration
     @EnableWebMvc
     @EnableWebSecurity
-    @Import({SecurityConfig.class, CorsConfig.class, SuccessHandler.class, MeController.class})
+    @Import({SecurityConfig.class, CorsConfig.class, SuccessHandler.class, MeController.class, com.omaru.keepsake_api.controller.CsrfController.class, com.omaru.keepsake_api.controller.WorkspaceController.class, com.omaru.keepsake_api.controller.TopicController.class, WorkspaceAccess.class})
     static class Config {
+        @Bean com.omaru.keepsake_api.repository.WorkspaceRepository workspaceRepository() { return mock(com.omaru.keepsake_api.repository.WorkspaceRepository.class); }
+        @Bean com.omaru.keepsake_api.service.WorkspaceService workspaceService() { return mock(com.omaru.keepsake_api.service.WorkspaceService.class); }
+        @Bean com.omaru.keepsake_api.service.TopicService topicService() { return mock(com.omaru.keepsake_api.service.TopicService.class); }
         @Bean AccountService accountService() { return mock(AccountService.class); }
         @Bean JwtService jwtService() { return mock(JwtService.class); }
         @Bean ClientRegistrationRepository clientRegistrationRepository() {
@@ -103,19 +106,53 @@ class LoginFlowTests {
                 new UsernamePasswordAuthenticationToken(user, null));
 
         assertEquals(302, response.getStatus());
-        assertEquals("/api/v1/me", response.getRedirectedUrl());
+        assertEquals("http://localhost:3000/", response.getRedirectedUrl());
         Cookie cookie = response.getCookie("access_token");
         assertNotNull(cookie);
         assertTrue(cookie.isHttpOnly());
         assertEquals("/", cookie.getPath());
         assertEquals(3600, cookie.getMaxAge());
 
-        mvc().perform(get(response.getRedirectedUrl()).cookie(cookie)
+        mvc().perform(get("/api/v1/me").cookie(cookie)
                         .header("Origin", "http://localhost:5173"))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Access-Control-Allow-Credentials", "true"))
                 .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"))
                 .andExpect(jsonPath("$.id").value(42))
                 .andExpect(jsonPath("$.email").value("test@example.com"));
+    }
+
+    @Test void workspaceMembershipAndCsrfAreEnforced() throws Exception {
+        when(jwtService.verifyAndGetAccountId("member-token")).thenReturn(7L);
+        Cookie cookie = new Cookie("access_token", "member-token");
+        var repository = context.getBean(com.omaru.keepsake_api.repository.WorkspaceRepository.class);
+        when(repository.hasAccount(10L, 7L)).thenReturn(true);
+        when(repository.hasAccount(20L, 7L)).thenReturn(false);
+        mvc().perform(get("/api/v1/workspaces/10/topics").cookie(cookie)).andExpect(status().isOk());
+        mvc().perform(get("/api/v1/workspaces/20/topics").cookie(cookie)).andExpect(status().isForbidden());
+        mvc().perform(get("/api/v1/workspaces")).andExpect(status().isUnauthorized());
+        mvc().perform(get("/api/v1/workspaces").cookie(cookie)).andExpect(status().isOk());
+        verify(context.getBean(com.omaru.keepsake_api.service.WorkspaceService.class)).getWorkspaces(7L);
+
+        mvc().perform(post("/api/v1/workspaces").cookie(cookie)
+                .contentType("application/json").content("{\"name\":\"Test\"}"))
+                .andExpect(status().isForbidden());
+        var result = mvc().perform(get("/api/v1/csrf").cookie(cookie))
+                .andExpect(status().isOk()).andReturn();
+        var token = (org.springframework.security.web.csrf.CsrfToken) result.getRequest()
+                .getAttribute(org.springframework.security.web.csrf.CsrfToken.class.getName());
+        var session = (org.springframework.mock.web.MockHttpSession) result.getRequest().getSession(false);
+        mvc().perform(post("/api/v1/workspaces").cookie(cookie).session(session)
+                .header(token.getHeaderName(), token.getToken())
+                .contentType("application/json").content("{\"name\":\"Test\"}"))
+                .andExpect(status().isCreated());
+        mvc().perform(post("/api/v1/workspaces/20/topics").cookie(cookie).session(session)
+                .header(token.getHeaderName(), token.getToken())
+                .contentType("application/json").content("{\"name\":\"Test\"}"))
+                .andExpect(status().isForbidden());
+        mvc().perform(options("/api/v1/workspaces").header("Origin", "http://localhost:5173")
+                .header("Access-Control-Request-Method", "POST")
+                .header("Access-Control-Request-Headers", "Content-Type,X-CSRF-TOKEN"))
+                .andExpect(status().isOk());
     }
 }

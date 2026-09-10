@@ -1,5 +1,7 @@
 package com.omaru.keepsake_api.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import com.omaru.keepsake_api.dto.request.EntryCreateRequestDto;
 import com.omaru.keepsake_api.dto.request.EntryUpdateRequestDto;
 import com.omaru.keepsake_api.dto.response.EntryResponseDto;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@PreAuthorize("@workspaceAccess.isMember(authentication, #workspaceId)")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/workspaces/{workspaceId}/topics/{topicId}/entries")
